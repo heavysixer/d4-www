@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/heavysixer/examples.git"
+    "url": "git://github.com/heavysixer/d4-www.git"
   },
   "bugs": {
-    "url": "https://github.com/heavysixer/examples/issues"
+    "url": "https://github.com/heavysixer/d4-www/issues"
   },
   "engines": {
     "node": ">=0.8"

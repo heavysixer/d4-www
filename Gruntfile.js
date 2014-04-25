@@ -43,11 +43,11 @@ module.exports = function(grunt) {
   grunt.initConfig({
     app: appConfig,
     meta: {
-      pkg: grunt.file.readJSON('../package.json'),
+      pkg: grunt.file.readJSON('../d4/package.json'),
     },
     watch: {
       assemble: {
-        files: ['<%= app.src %>/{assets,content,data,templates}/**/*.{md,hbs,yml,css}', '<%= app.src %>/../../docs/**/*.{md,hbs,yml}', '<%= app.src %>/../../README.md', '<%= app.src %>/../docs/d4-doc.md', '<%= app.src %>/../d4.css'],
+        files: ['<%= app.src %>/{assets,content,data,templates}/**/*.{md,hbs,yml,css}', '<%= app.src %>/../d4/docs/**/*.{md,hbs,yml}', '<%= app.src %>/../d4/README.md', '<%= app.src %>/../d4/docs/d4-doc.md', '<%= app.src %>/../d4/d4.css'],
         tasks: ['copy:styles', 'assemble']
       },
       livereload: {
@@ -187,12 +187,12 @@ module.exports = function(grunt) {
     },
     mox: {
       build: {
-        sourceFiles: ['../src/'],
+        sourceFiles: ['../d4/src/'],
         options: {
           name: '<%= meta.pkg.name %>',
           version: '<%= meta.pkg.version %>',
           template: 'file',
-          outputFile: '../docs/<%= meta.pkg.name %>-doc.md'
+          outputFile: '../d4/docs/<%= meta.pkg.name %>-doc.md'
         }
       },
     },
