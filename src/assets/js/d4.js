@@ -1,6 +1,6 @@
-/*! d4 - v0.8.0
+/*! d4 - v0.8.1
  *  License: MIT Expat
- *  Date: 2014-04-24
+ *  Date: 2014-04-29
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -1337,6 +1337,70 @@
   /*
    * The donut chart
    *
+   *##### Features
+   *
+   * `arcs` - The arc series
+   * `arcLabels` - The data labels linked to the arcs
+   * `radius` - The total radius of the chart
+   * `arcWidth` - The width of the arc
+   *
+   *##### Example Usage
+   *
+   *     var generateData = function() {
+   *       var data = [];
+   *       var names = ['Clay Hauck', 'Diego Hickle', 'Heloise Quitzon',
+   *         'Hildegard Littel', 'Janiya Legros', 'Karolann Boehm',
+   *         'Lilyan Deckow IV', 'Lizeth Blick', 'Marlene O\'Kon', 'Marley Gutmann'
+   *       ],
+   *         pie = d3.layout.pie()
+   *           .sort(null)
+   *           .value(function(d) {
+   *             return d.unitsSold;
+   *           });
+   *       d4.each(names, function(name) {
+   *         data.push({
+   *           unitsSold: Math.max(10, Math.random() * 100),
+   *           salesman: name
+   *         });
+   *       });
+   *       return pie(data);
+   *     };
+   *
+   *     var chart = d4.charts.donut()
+   *       .outerWidth($('#pie').width())
+   *       .margin({
+   *         left: 0,
+   *         top: 0,
+   *         right: 0,
+   *         bottom: 0
+   *       })
+   *       .radius(function() {
+   *         return this.width / 8;
+   *       })
+   *       .arcWidth(50)
+   *       .using('arcLabels', function(labels) {
+   *         labels.text(function(d) {
+   *           return d.data.salesman;
+   *         })
+   *       })
+   *       .using('arcs', function(slices) {
+   *         slices.key(function(d) {
+   *           return d.data.salesman;
+   *         });
+   *       });
+   *
+   *
+   *     var redraw = function() {
+   *       var data = generateData();
+   *       d3.select('#pie')
+   *         .datum(data)
+   *         .call(chart);
+   *     };
+   *     (function loop() {
+   *       redraw();
+   *       setTimeout(loop, 4500);
+   *     })();
+   *
    * @name donut
    */
   d4.chart('donut', function donut() {
@@ -2194,7 +2258,7 @@
         },
 
         text: function(d) {
-          return d3.format('').call(this, d[this.valueKey]);
+          return d[this.valueKey];
         }
       }
     };
@@ -2341,6 +2405,22 @@
   'use strict';
   /*
    * Arc labels are used to annotate arc series, for example those created by pie and donut charts.
+   * Many of the accessors of this feature proxy directly to D3's arc object:
+   * https://github.com/mbostock/d3/wiki/SVG-Shapes#arc
+   *
+   *##### Accessors
+   *
+   * `centroid` - proxied accessor to the navtive d3 function
+   * `classes` - classes assigned to the arc label.
+   * `duration` - time in milliseconds for the transition to occur.
+   * `endAngle` - proxied accessor to the navtive d3 function
+   * `innerRadius` - proxied accessor to the navtive d3 function
+   * `key` - unique identifier used for linking the element during d3's transition process
+   * `outerRadius` - proxied accessor to the navtive d3 function
+   * `startAngle` - proxied accessor to the navtive d3 function
+   * `text` - value to display in the label.
+   * `x` - position across the x axis
+   * `y` - position across the y axis
    *
    * @name arcLabels
    */
@@ -2442,7 +2522,22 @@
 (function() {
   'use strict';
   /*
-   * The arcSeries create the "slices" that are used by donut and pie charts.
+   * Arc series is a collection of arcs suitable for those needed by pie and donut charts.
+   * Many of the accessors of this feature proxy directly to D3's arc object:
+   * https://github.com/mbostock/d3/wiki/SVG-Shapes#arc
+   *
+   *##### Accessors
+   *
+   * `centroid` - proxied accessor to the navtive d3 function
+   * `classes` - classes assigned to the arc label.
+   * `duration` - time in milliseconds for the transition to occur.
+   * `endAngle` - proxied accessor to the navtive d3 function
+   * `innerRadius` - proxied accessor to the navtive d3 function
+   * `key` - unique identifier used for linking the element during d3's transition process
+   * `outerRadius` - proxied accessor to the navtive d3 function
+   * `startAngle` - proxied accessor to the navtive d3 function
+   * `x` - position across the x axis
+   * `y` - position across the y axis
    *
    * @name arcSeries
    */
@@ -2540,9 +2635,8 @@
   d4.feature('arrow', function(name) {
     return {
       accessors: {
-        tipSize: function() {
-          return 6;
-        },
+        classes: 'line',
+        tipSize: 6,
         x1: function() {
           return this.x(0);
         },
@@ -2557,9 +2651,6 @@
 
         y2: function() {
           return this.y(this.height);
-        },
-        classes: function() {
-          return 'line';
         }
       },
       render: function(scope, data, selection) {
@@ -2624,6 +2715,7 @@
         key: function(d, i) {
           return (d.key || 0) + i;
         },
+
         x: function(d) {
           if (d4.isOrdinalScale(this.x)) {
             return this.x(d[this.x.$key]) + (this.x.rangeBand() / 2);
@@ -2643,7 +2735,7 @@
         },
 
         text: function(d) {
-          return d3.format('').call(this, d[this.valueKey]);
+          return d[this.valueKey];
         }
       },
       render: function(scope, data, selection) {
@@ -2672,7 +2764,6 @@
    */
   d4.feature('grid', function(name) {
 
-    // TODO: These should really be added to the proxies, but it will require a prefix option so that they do not override each other.
     var xAxis = d3.svg.axis();
     var yAxis = d3.svg.axis();
 
@@ -2873,7 +2964,7 @@
         var label = this.svg.select('.' + name).selectAll('.' + name).data(data);
         label.enter().append('text');
         label.exit().remove();
-        label.attr('class', 'lineSeriesLabel')
+        label.attr('class', 'line-series-label')
           .text(d4.functor(scope.accessors.text).bind(this))
           .attr('x', d4.functor(scope.accessors.x).bind(this))
           .attr('y', d4.functor(scope.accessors.y).bind(this))
@@ -3155,15 +3246,15 @@
           if (d4.isDefined(d.y0)) {
             if (d4.isOrdinalScale(this.x)) {
               if (Math.abs(this.y(d.y0) - this.y(d.y0 + d.y)) > 20) {
-                return d3.format('').call(this, d[this.valueKey]);
+                return d[this.valueKey];
               }
             } else {
               if (Math.abs(this.x(d.y0) - this.x(d.y0 + d.y)) > 20) {
-                return d3.format('').call(this, d[this.valueKey]);
+                return d[this.valueKey];
               }
             }
           } else {
-            return d3.format('').call(this, d[this.valueKey]);
+            return d[this.valueKey];
           }
         },
 
@@ -3224,8 +3315,11 @@
           var rect;
           d4.each(rows, function(cols) {
             d4.each(cols, function(text) {
+              var txt = d3.select(text);
               rect = text.getBoundingClientRect();
-              d3.select(text).attr('transform', 'translate(0,' + Math.floor(rect.height / 2) + ')');
+              if (txt.attr('transform') === null) {
+                txt.attr('transform', 'translate(0,' + Math.floor(rect.height / 2) + ')');
+              }
             });
           });
         });
@@ -3537,7 +3631,7 @@
     return {
       accessors: {
         text: function(d) {
-          return d3.format('').call(this, d[1]);
+          return d[this.valueKey];
         },
 
         textX: function() {
@@ -3549,7 +3643,7 @@
         },
 
         x1: function() {
-          return this.x(0);
+          return this.x(this.x.$key);
         },
 
         x2: function() {
@@ -3557,7 +3651,7 @@
         },
 
         y1: function() {
-          return this.y(0);
+          return this.y(this.y.$key);
         },
 
         y2: function() {
@@ -3572,7 +3666,7 @@
           .attr('viewBox', '0 0 10 10')
           .attr('refX', 10)
           .attr('refY', 5)
-          .attr('markerWidth', -6)
+          .attr('markerWidth', 6)
           .attr('markerHeight', 6)
           .attr('orient', 'auto')
           .append('path')
@@ -4198,6 +4292,10 @@
       },
       data: []
     };
+    opts.nestKey = function() {
+      return opts.y.key;
+    };
+
 
     var findValues = function(dimensions, items) {
       ['x', 'y', 'value'].forEach(function(k) {
@@ -4258,10 +4356,15 @@
       }
 
       findValues(opts, opts.data);
-      opts.data = nestByDimension(opts.y.key, opts.value.key, opts.data);
+      opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
 
       stackByDimension(opts.x.key, opts.data);
       return opts;
+    };
+
+    parser.nestKey = function(funct) {
+      opts.nestKey = d4.functor(funct).bind(opts);
+      return parser;
     };
 
     d4.each(['x', 'y', 'value'], function(k) {
@@ -4535,7 +4638,6 @@
   };
 
   /**
-   *
    * Creates a linear scale for a dimension of a given chart.
    * @name linearScaleForNestedData
    * @param {Object} d4 chart object
@@ -4546,7 +4648,6 @@
   d4.builder('linearScaleForNestedData', linearOrTimeScale);
 
   /**
-   *
    * Creates a time scale for a dimension of a given chart.
    * @name timeScaleForNestedData
    * @param {Object} d4 chart object
