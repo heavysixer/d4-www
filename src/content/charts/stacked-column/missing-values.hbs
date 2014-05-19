@@ -1,0 +1,114 @@
+---
+title: Missing Values
+concepts:
+  - Parsers
+---
+
+<h5>{{title}}</h5>
+<p>
+  Sometimes the chart data is not always complete. These holes in the data can
+  wreck havoc on the visual correctness of your charts. Moreover, many of d3's
+  internals assume the data will be sanitized before being handed off. For this
+  reason the parsers have a <code>defined()</code> method which tells d4 how to
+  check the incoming data. D4's <code>defined()</code> method is meant to follow
+  the approach of d3's native <a href='https://github.com/mbostock/d3/wiki/SVG-Shapes#line_defined'>method</a>
+  of the same name. Any data that returns false will not be included in  the
+  dataset sent to d3. The following example demonstrates this process.
+</p>
+<hr/>
+<script type="text/javascript" charset="utf-8" id='source_code'>
+'use strict';
+
+$(document).ready(function(){
+  var data = [
+      { year: '2010', unitsSold: null, salesman : null },
+      { year: '2011', unitsSold: null, salesman : null },
+      { year: '2012', unitsSold: null, salesman : null },
+      { year: '2013', unitsSold: null, salesman : null },
+      { year: '2014', unitsSold: null, salesman : null },
+      { year: '2010', unitsSold: 100, salesman : 'Gina' },
+      { year: '2011', unitsSold: 100, salesman : 'Gina' },
+      { year: '2012', unitsSold: 200, salesman : 'Gina' },
+      { year: '2013', unitsSold: -500, salesman : 'Gina' },
+      { year: '2014', unitsSold: null, salesman : 'Gina' },
+      { year: '2010', unitsSold: 400, salesman : 'Average' },
+      { year: '2011', unitsSold: 100, salesman : 'Average' },
+      { year: '2012', unitsSold: 400, salesman : 'Average' },
+      { year: '2013', unitsSold: -400, salesman : 'Average' },
+      { year: '2014', unitsSold: -400, salesman : 'Average' },
+      { year: '2010', unitsSold: null, salesman : null },
+      { year: '2011', unitsSold: null, salesman : null },
+      { year: '2012', unitsSold: null, salesman : null },
+      { year: '2013', unitsSold: null, salesman : null },
+      { year: '2014', unitsSold: null, salesman : null }
+    ];
+
+  var parsedData = d4.parsers.nestedStack()
+    .x('year')
+    .y('salesman')
+    .value('unitsSold')
+    .defined(function(d){
+      return d.salesman !== null;
+    })
+    (data);
+
+  var chart = d4.charts.stackedColumn()
+  .outerWidth($('#example').width())
+  .x(function(x){
+    x.key('year');
+  })
+  .y(function(y){
+    y.key('unitsSold');
+  })
+  .mixin({
+    'name' : 'zeroLine',
+    'feature' : d4.features.referenceLine
+  })
+  .using('zeroLine', function(zero) {
+    zero
+      .x1(0)
+      .x2(function() {
+        return this.width;
+      })
+      .y1(function() {
+        return this.y(0);
+      })
+      .y2(function() {
+        return this.y(0);
+      });
+  });
+
+  d3.select('#example')
+  .datum(parsedData.data)
+  .call(chart);
+});
+
+</script>
+<div id="stacked_column">
+  <div class="appendBottom">
+  <span class="label average">Average</span>
+  <span class="label gina">Gina</span>
+  <span class="label bob">Bob</span>
+  </div>
+  <div id="example"></div>
+</div>
+<h6>CSS Code</h6>
+<pre><code class="language-css">
+#stacked_column .d4 .series0 .bar.fill, #stacked_column .average {
+    fill: #CD202C;
+    background-color: #CD202C;
+}
+
+#stacked_column .d4 .series1 .bar.fill, #stacked_column .gina {
+    fill: #AD005B;
+    background-color: #AD005B;
+}
+
+#stacked_column .d4 .series2 .bar.fill, #stacked_column .bob {
+    fill: #66307C;
+    background-color: #66307C;
+}
+</code></pre>
+<h6>JavaScript Code</h6>
+<pre><code id="code" class="language-javascript"></code></pre>
+{{> disqus }}
