@@ -1,6 +1,6 @@
-/*! d4 - v0.8.2
+/*! d4 - v0.8.3
  *  License: MIT Expat
- *  Date: 2014-05-16
+ *  Date: 2014-05-19
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
