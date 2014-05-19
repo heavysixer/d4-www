@@ -1,0 +1,78 @@
+---
+title: Grouped Column Chart With Missing Values
+concepts:
+  - Parsers
+---
+
+<h5>{{title}}</h5>
+<p>
+  Sometimes the chart data is not always complete. These holes in the data can
+  wreck havoc on the visual correctness of your charts. Moreover, many of d3's
+  internals assume the data will be sanitized before being handed off. For this
+  reason the parsers have a <code>defined()</code> method which tells d4 how to
+  check the incoming data. D4's <code>defined()</code> method is meant to follow
+  the approach of d3's native <a href='https://github.com/mbostock/d3/wiki/SVG-Shapes#line_defined'>method</a>
+  of the same name. Any data that returns false will not be included in  the
+  dataset sent to d3. The following example demonstrates this process.
+</p>
+<hr/>
+<script type="text/javascript" charset="utf-8" id='source_code'>
+'use strict';
+
+$(document).ready(function(){
+  var data = [
+  { year: '2010', unitsSold: null, salesman : null },
+  { year: '2011', unitsSold: null, salesman : null },
+  { year: '2012', unitsSold: null, salesman : null },
+  { year: '2013', unitsSold: null, salesman : null },
+  { year: '2014', unitsSold: null, salesman : null },
+  { year: '2010', unitsSold: 100, salesman : 'Gina' },
+  { year: '2011', unitsSold: 100, salesman : 'Gina' },
+  { year: '2012', unitsSold: 200, salesman : 'Gina' },
+  { year: '2013', unitsSold: -500, salesman : 'Gina' },
+  { year: '2014', unitsSold: null, salesman : 'Gina' },
+  { year: '2010', unitsSold: 400, salesman : 'Average' },
+  { year: '2011', unitsSold: 100, salesman : 'Average' },
+  { year: '2012', unitsSold: 400, salesman : 'Average' },
+  { year: '2013', unitsSold: -400, salesman : 'Average' },
+  { year: '2014', unitsSold: -400, salesman : 'Average' },
+  { year: '2010', unitsSold: null, salesman : null },
+  { year: '2011', unitsSold: null, salesman : null },
+  { year: '2012', unitsSold: null, salesman : null },
+  { year: '2013', unitsSold: null, salesman : null },
+  { year: '2014', unitsSold: null, salesman : null }
+    ];
+
+  var parsedData = d4.parsers.nestedGroup()
+    .x('year')
+    .y('unitsSold')
+    .defined(function(d){
+      return d.salesman !== null;
+    })
+    .value('unitsSold')(data);
+
+  var chart = d4.charts.groupedColumn();
+  chart
+  .outerWidth($('#example').width())
+  .x(function(x){
+    x.key('year');
+
+    // Just for fun lets reduce the outer padding of the column chart.
+    // This also shows how d4 transparently passes the appropriate calls to d3.
+    x.rangeRoundBands([0, chart.width()], 0.2, 0.1);
+  })
+  .y(function(y){
+    y.key('unitsSold');
+  })
+  .groupsOf(parsedData.data[0].values.length);
+
+  d3.select('#example')
+  .datum(parsedData.data)
+  .call(chart);
+});
+
+</script>
+<div id="example"></div>
+<h6>JavaScript Code</h6>
+<pre><code id="code" class="language-javascript"></code></pre>
+{{> disqus }}
