@@ -1,0 +1,65 @@
+---
+title: Simple Brush
+features:
+  - Brushes
+---
+<h5>{{title}}</h5>
+<p>
+
+</p>
+
+<hr/>
+<script type="text/javascript" charset="utf-8" id='source_code'>
+'use strict';
+
+$(document).ready(function(){
+  var data = [
+      { age: 5, unitsSold: 0,    month: 5 },
+      { age: 23, unitsSold: 200,  month: 2 },
+      { age: 44, unitsSold: 300,  month: 3 },
+      { age: 35, unitsSold: 400,  month: 4 },
+      { age: 26, unitsSold: 500,  month: 5 },
+      { age: 17, unitsSold: 100,  month: 6 },
+      { age: 78, unitsSold: 100,  month: 7 },
+      { age: 49, unitsSold: -200, month: 8 },
+      { age: 30, unitsSold: 500,  month: 9 },
+      { age: 11, unitsSold: 600,  month: 10 },
+      { age: 62, unitsSold: 400,  month: 11 },
+      { age: 83, unitsSold: 0,    month: 12 }
+    ];
+
+  var sign = function(val) {
+    return (val > 0) ? 'positive' : 'negative';
+  };
+
+  var chart = d4.charts.scatterPlot()
+  .outerWidth($('#brushable').width())
+  .x(function(x){
+    x.min(-10);
+    x.key('age');
+  })
+  .y(function(y){
+    y.key('month');
+  })
+  .valueKey('unitsSold')
+  .z(function(z){
+    z.key('unitsSold');
+  })
+  .using('circles', function(circle){
+    circle.classes(function (d, i) {
+          return 'bar brushable fill item' + i + ' ' + sign(d[this.valueKey]) + ' ' + d[this.y.$key];
+    });
+  })
+  .mixin({'name' : 'brush', 'feature' : d4.features.brush });
+
+  d3.select('#brushable')
+  .datum(data)
+  .call(chart);
+});
+</script>
+<div id="scatter">
+  <div id="brushable"></div>
+</div>
+<h6>JavaScript Code</h6>
+<pre><code id="code" class="language-javascript"></code></pre>
+{{> disqus }}

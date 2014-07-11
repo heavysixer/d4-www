@@ -19,6 +19,9 @@ svg.d4 {
   background: linear-gradient(to bottom,  #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=0 ); /* IE6-8 */
 }
+.d4 .brush .extent {
+    fill : rgba(0,0,0,0.2);
+}
 .d4 .tick text {
     font-size: 9px;
     fill: #999;
@@ -262,6 +265,14 @@ svg.d4 {
     fill: #E37222;
     background-color: #E37222;
 }
+
+#brushable .d4.selecting circle {
+    opacity: 0.5;
+}
+#brushable .d4.selecting circle.selected {
+    opacity: 1.0;
+}
+
 
 #multi_scatter .d4 .grid.border rect {
     fill: none;

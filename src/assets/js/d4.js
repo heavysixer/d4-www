@@ -1,6 +1,6 @@
 /*! d4 - v0.8.4
  *  License: MIT Expat
- *  Date: 2014-05-19
+ *  Date: 2014-07-11
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -2742,6 +2742,49 @@
 
 (function() {
   'use strict';
+
+  d4.feature('brush', function(name) {
+    var brush = d3.svg.brush();
+
+    var obj = {
+      accessors: {
+        brushable: function() {
+          return d3.selectAll('.brushable');
+        },
+        brushstart: function() {
+          this.svg.classed('selecting', true);
+        },
+        brushmove: function() {
+          var e = d3.event.target.extent();
+          this.features[name].accessors.brushable().classed('selected', function(d) {
+            var selected = e[0][0] <= d[this.x.$key] &&
+            d[this.x.$key] <= e[1][0] &&
+            e[0][1] <= d[this.y.$key] &&
+            d[this.y.$key] <= e[1][1];
+            return selected;
+          }.bind(this));
+        },
+        brushend: function() {
+          this.svg.classed('selecting', !d3.event.target.empty());
+        }
+      },
+      proxies: [{
+        target: brush
+      }],
+      render: function(scope, data, selection) {
+        d4.appendOnce(selection, 'g.' + name)
+          .call(brush.x(this.x).y(this.y)
+            .on('brushstart', d4.functor(scope.accessors.brushstart).bind(this))
+            .on('brush', d4.functor(scope.accessors.brushmove).bind(this))
+            .on('brushend', d4.functor(scope.accessors.brushend).bind(this)));
+      }
+    };
+    return obj;
+  });
+}).call(this);
+
+(function() {
+  'use strict';
   /*
    * The columnLabels feature is used to affix data labels to column series.
    *
@@ -3092,19 +3135,19 @@
     return {
       accessors: {
         x1: function() {
-          return this.x(0);
+          return this.x(this.x.domain()[0]);
         },
 
         x2: function() {
-          return this.x(this.width);
+          return this.x(this.x.domain()[1]);
         },
 
         y1: function() {
-          return this.y(0);
+          return this.y(this.y.domain()[1]);
         },
 
         y2: function() {
-          return this.y(this.height);
+          return this.y(this.y.domain()[0]);
         },
         classes: function() {
           return 'line';
