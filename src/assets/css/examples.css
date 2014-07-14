@@ -276,6 +276,17 @@ svg.d4 {
     stroke: #f00;
 }
 
+#ordinal_brush circle {
+  -webkit-transition: fill-opacity 250ms linear !important;
+}
+#ordinal_brush .d4.selecting path {
+    fill-opacity: 0.2;
+}
+#ordinal_brush .d4.selecting path.selected {
+    stroke: #f00;
+}
+
+
 #multi_scatter .d4 .grid.border rect {
     fill: none;
     stroke: #aaa;

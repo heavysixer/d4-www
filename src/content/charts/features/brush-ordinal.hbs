@@ -1,0 +1,149 @@
+---
+title: Ordinal Brushes
+features:
+  - Brushes
+---
+<h5>{{title}}</h5>
+<p>
+  This example demonstrates how to use a d3 brush with d4 to select items within a chart with an ordinal scale. This example
+  is based off an older <a href="https://github.com/mbostock/d3/blob/v2.9.0/examples/brush/brush-ordinal.html" target="_new">d3 brush example</a>.
+  Brushes in d3 are a means for selecting an arbitrary number of data elements within a chart. Typically this is done by creating a brush area
+  and dragging it around the chart area.
+</p>
+<p>
+  The purpose of this example is to give a simple example of how you might tie in a d3 brush into a chart using d4. For more details on how
+  brushes work consult the <a href="https://github.com/mbostock/d3/wiki/SVG-Controls#brush" target="_new">d3 documentation</a> directly.
+</p>
+
+<hr/>
+<script type="text/javascript" charset="utf-8" id='source_code'>
+'use strict';
+
+$(document).ready(function(){
+  var data = d3.svg.symbolTypes;
+
+  /*
+    This example takes a bit of setup to replicate. In this case we are creating
+    a simple throw away feature used to render the svg shapes out. This does not
+    expressly deal with brushes so you can safely ignore this code, unless you
+    are interested.
+  */
+  d4.feature('pathSeries', function(name) {
+    return {
+      accessors: {
+        classes: function(){
+          return 'path';
+        }
+      },
+      render: function(scope, data, selection) {
+        selection.append('g').attr('class', name);
+        var group = selection.select('.' + name).selectAll('g').data(data);
+        group.exit().remove();
+        group.enter().append('g');
+        var path = group.selectAll('path')
+        .data(function(d){
+          return d.values;
+        });
+        path.enter().append('path')
+        .attr('class', d4.functor(scope.accessors.classes).bind(this))
+        .attr('transform', function(d) {
+
+          // This is a bug we should not have to reset the rangePoints here.
+          this.x.rangePoints([0, this.width],1);
+          return 'translate(' + this.x(d) + ',' + (this.height / 2) + ')';
+        }.bind(this))
+        .attr('d', d3.svg.symbol().type(String).size(this.height));
+      }
+    };
+  }).call(this);
+
+  /*
+    Now that we have our symbol feature we can create our chart and assign the
+    brush callbacks.
+   */
+  var chart = d4.baseChart().mixin([
+    {
+      'name': 'pathSeries',
+      'feature' : d4.features.pathSeries
+    },
+    {
+      'name': 'xAxis',
+      'feature': d4.features.xAxis
+    }
+  ]);
+  chart
+  .margin({top: 10, right: 10, bottom: 40, left:10})
+  .outerHeight(100)
+  .outerWidth($('#ordinal_brush').width())
+  .x(function(x){
+    x
+    .domain(data)
+    .rangePoints([0, chart.width()],1);
+  })
+  .using('xAxis', function(axis){
+    axis.tickSize(10,5);
+  })
+  .using('pathSeries', function(line){
+
+    /*
+      To make a svg element selectable by the brush simply give it the
+      "brushable" class. In this example we override the classes accessor
+      of the circles feature to give each circle drawn to the chart the
+      "brushable" class.
+
+      Using a class-based approach is only one way to
+      handle the selection of brushable items. Check the other examples for
+      a more detailed exploration of how brushes can be used in d4.
+    */
+    line.classes(function () {
+      return 'brushable';
+    });
+  })
+
+  // Here we mix in the d3 brush.
+  .mixin({'name' : 'brush', 'feature' : d4.features.brush })
+
+  // Here is where we use the brush.
+  .using('brush', function(brush){
+    brush
+
+    /*
+      The `brushstart` method is invoked when the user first selects the brushable
+      area with a click or touch.
+    */
+    .brushstart(function(){
+      d3.select('#ordinal_brush svg').classed('selecting', true);
+      console.log(d3.select('#ordinal_brush g.brush').select('rect'))
+      d3.select('#ordinal_brush .brush').selectAll('rect').attr('height', chart.height());
+    })
+    /*
+      Everytime the user moves the brush this method sweeps the brushable elements
+      looking for selections to add or remove.
+    */
+    .brushmove('brush', function(){
+      var s = d3.event.target.extent();
+      d3.selectAll('.brushable').classed('selected', function(d) { return s[0] <= (d = chart.x.scale(d)) && d <= s[1]; });
+    })
+    /*
+      This method is called when the user releases their mouse or removes their
+      finger from the touch device.
+    */
+    .brushend(function(){
+      d3.select('#ordinal_brush svg').classed('selecting', !d3.event.target.empty());
+    });
+  });
+
+  d3.select('#ordinal_brush')
+  .datum(data)
+  .call(chart);
+});
+</script>
+<div id="scatter">
+  <div id="ordinal_brush"></div>
+</div>
+<h6>JavaScript Code</h6>
+<pre><code id="code" class="language-javascript"></code></pre>
+<h6>CSS</h6>
+<pre><code id="code" class="language-css">
+</code></pre>
+{{> disqus }}
