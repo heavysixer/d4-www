@@ -5,7 +5,14 @@ features:
 ---
 <h5>{{title}}</h5>
 <p>
-
+  This example demonstrates how to use a d3 brush with d4 to select items within a chart. This example
+  is based off an older <a href="https://github.com/mbostock/d3/blob/v2.9.0/examples/brush/brush.html" target="_new">d3 brush example</a>.
+  Brushes in d3 are a means for selecting an arbitrary number of data elements within a chart. Typically this is done by creating a brush area
+  and dragging it around the chart area.
+</p>
+<p>
+  The purpose of this example is to give a simple example of how you might tie in a d3 brush into a chart using d4. For more details on how
+  brushes work consult the <a href="https://github.com/mbostock/d3/wiki/SVG-Controls#brush" target="_new">d3 documentation</a> directly.
 </p>
 
 <hr/>
@@ -13,43 +20,41 @@ features:
 'use strict';
 
 $(document).ready(function(){
-  var data = [
-      { age: 5, unitsSold: 0,    month: 5 },
-      { age: 23, unitsSold: 200,  month: 2 },
-      { age: 44, unitsSold: 300,  month: 3 },
-      { age: 35, unitsSold: 400,  month: 4 },
-      { age: 26, unitsSold: 500,  month: 5 },
-      { age: 17, unitsSold: 100,  month: 6 },
-      { age: 78, unitsSold: 100,  month: 7 },
-      { age: 49, unitsSold: -200, month: 8 },
-      { age: 30, unitsSold: 500,  month: 9 },
-      { age: 11, unitsSold: 600,  month: 10 },
-      { age: 62, unitsSold: 400,  month: 11 },
-      { age: 83, unitsSold: 0,    month: 12 }
-    ];
-
-  var sign = function(val) {
-    return (val > 0) ? 'positive' : 'negative';
-  };
+  var random = d3.random.normal(0.5, 0.1),
+      data = d3.range(800).map(function() { return [random(), random(), 3.5]; });
 
   var chart = d4.charts.scatterPlot()
   .outerWidth($('#brushable').width())
   .x(function(x){
-    x.min(-10);
-    x.key('age');
+    x.scale('linear')
+    .min(0)
+    .max(1.0)
+    .key(0);
   })
   .y(function(y){
-    y.key('month');
-  })
-  .valueKey('unitsSold')
-  .z(function(z){
-    z.key('unitsSold');
+    y.scale('linear')
+    .min(0)
+    .max(1.0)
+    .key(1);
   })
   .using('circles', function(circle){
-    circle.classes(function (d, i) {
-          return 'bar brushable fill item' + i + ' ' + sign(d[this.valueKey]) + ' ' + d[this.y.$key];
-    });
+
+    /*
+      To make a svg element selectable by the brush simply give it the
+      "brushable" class. In this example we override the classes accessor
+      of the circles feature to give each circle drawn to the chart the
+      "brushable" class.
+
+      Using a class-based approach is only one way to
+      handle the selection of brushable items. Check the other examples for
+      a more detailed exploration of how brushes can be used in d4.
+    */
+    circle.classes(function () {
+      return 'brushable';
+    })
+    .r(3.5);
   })
+  .mixout('circleLabels')
   .mixin({'name' : 'brush', 'feature' : d4.features.brush });
 
   d3.select('#brushable')
@@ -62,4 +67,16 @@ $(document).ready(function(){
 </div>
 <h6>JavaScript Code</h6>
 <pre><code id="code" class="language-javascript"></code></pre>
+<h6>CSS</h6>
+<pre><code id="code" class="language-css">
+#brushable circle {
+  -webkit-transition: fill-opacity 250ms linear !important;
+}
+#brushable .d4.selecting circle {
+    fill-opacity: 0.2;
+}
+#brushable .d4.selecting circle.selected {
+    stroke: #f00;
+}
+</code></pre>
 {{> disqus }}

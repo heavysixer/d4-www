@@ -266,13 +266,15 @@ svg.d4 {
     background-color: #E37222;
 }
 
+#brushable circle {
+  -webkit-transition: fill-opacity 250ms linear !important;
+}
 #brushable .d4.selecting circle {
-    opacity: 0.5;
+    fill-opacity: 0.2;
 }
 #brushable .d4.selecting circle.selected {
-    opacity: 1.0;
+    stroke: #f00;
 }
-
 
 #multi_scatter .d4 .grid.border rect {
     fill: none;
