@@ -111,7 +111,8 @@ $(document).ready(function(){
 
     /*
       The `brushstart` method is invoked when the user first selects the brushable
-      area with a click or touch.
+      area with a click or touch. By default d4 already applies the selecting
+      class. It is repeated here for completeness of the example.
     */
     .brushstart(function(){
       d3.select('#ordinal_brush svg')
@@ -120,7 +121,9 @@ $(document).ready(function(){
 
     /*
       Everytime the user moves the brush this method sweeps the brushable elements
-      looking for selections to add or remove.
+      looking for selections to add or remove. By default d4 already detects if
+      a selectable element is within the brush's extent. It is repeated here for
+      the completeness of the example.
     */
     .brushmove(function(){
       var e = d3.event.target.extent();
@@ -131,7 +134,8 @@ $(document).ready(function(){
 
     /*
       This method is called when the user releases their mouse or removes their
-      finger from the touch device.
+      finger from the touch device. By default d4 already removes the selecting
+      class. It is repeated here for the completeness of the example.
     */
     .brushend(function(){
       d3.select('#ordinal_brush svg').classed('selecting', !d3.event.target.empty());
@@ -157,5 +161,25 @@ $(document).ready(function(){
 <pre><code id="code" class="language-javascript"></code></pre>
 <h6>CSS</h6>
 <pre><code id="code" class="language-css">
+  #ordinal_brush .selecting path {
+    fill-opacity: .2;
+  }
+
+  #ordinal_brush .selecting path.selected {
+    stroke: #f00;
+    stroke-width: 2px;
+  }
+
+  #ordinal_brush .axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  #ordinal_brush .brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+  }
 </code></pre>
 {{> disqus }}

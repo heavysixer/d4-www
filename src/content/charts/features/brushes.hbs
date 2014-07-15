@@ -57,13 +57,14 @@ $(document).ready(function(){
   .mixout('circleLabels')
   .mixin({'name' : 'brush', 'feature' : d4.features.brush })
   .using('brush', function(brush){
-    brush.x(function(){
-      console.log(this.x.$scale)
-      return this.x;
-    });
-    brush.y(function() {
-      return this.y;
-    });
+    /*
+      In order to drag a brush around the chart you must specify the
+      dimensions it must be aware of. In this case we specify that the
+      brush will use both the x and y dimensions, which will allow the
+      brush to be resized on all four sides.
+    */
+    brush.x(this.x);
+    brush.y(this.y);
   });
 
   d3.select('#brushable')

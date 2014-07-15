@@ -1081,6 +1081,24 @@
   };
 
   /**
+   * Helper method to determine if a supplied argument is not null
+   * @param {*} value - the argument to test
+   * @return {Boolean}
+   */
+  d4.isNotNull = function(value) {
+    return !d4.isNull(value);
+  };
+
+  /**
+   * Helper method to determine if a supplied argument is null
+   * @param {*} value - the argument to test
+   * @return {Boolean}
+   */
+  d4.isNull = function(value) {
+    return value === null;
+  };
+
+  /**
    * Helper method to determine if a supplied argument is undefined
    * @param {*} value - the argument to test
    * @return {Boolean}
@@ -2756,19 +2774,36 @@
     };
 
     var brushDetectionFunction = function(e) {
-      console.log(e);
+      if(d4.isNull(brush.y())){
+        return function(d) {
+          var selected = e[0] <= (d = this.x(d)) && d <= e[1];
+          return selected;
+        }.bind(this);
+      }
 
-      return function(d) {
-        var selected = e[0][0] <= d[this.x.$key] &&
-          d[this.x.$key] <= e[1][0] &&
-          e[0][1] <= d[this.y.$key] &&
-          d[this.y.$key] <= e[1][1];
-        return selected;
-      }.bind(this);
+      if(d4.isNull(brush.x())) {
+        return function(d) {
+          var selected = e[0] <= (d = this.y(d)) && d <= e[1];
+          return selected;
+        }.bind(this);
+      }
+
+      if (d4.isNotNull(brush.x()) && d4.isNotNull(brush.y())) {
+        return function(d) {
+          var selected = e[0][0] <= d[this.x.$key] &&
+            d[this.x.$key] <= e[1][0] &&
+            e[0][1] <= d[this.y.$key] &&
+            d[this.y.$key] <= e[1][1];
+          return selected;
+        }.bind(this);
+      }
     };
 
     var obj = {
       accessors: {
+        brush: function(obj) {
+          return obj;
+        },
         brushable: function() {
           return d3.selectAll('.brushable');
         },
@@ -2793,9 +2828,7 @@
           return null;
         },
       },
-      //proxies: [{
-      //  target: brush
-      //}],
+
       render: function(scope, data, selection) {
         var brushX = setBrushScale.bind(this)(scope.accessors.x);
         var brushY = setBrushScale.bind(this)(scope.accessors.y);
@@ -2814,6 +2847,7 @@
           .call(brush);
 
         scope.accessors.selection.bind(this)(selection.select('.brush'));
+        scope.accessors.brush.bind(this)(brush);
       }
     };
     return obj;
