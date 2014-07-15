@@ -55,7 +55,16 @@ $(document).ready(function(){
     .r(3.5);
   })
   .mixout('circleLabels')
-  .mixin({'name' : 'brush', 'feature' : d4.features.brush });
+  .mixin({'name' : 'brush', 'feature' : d4.features.brush })
+  .using('brush', function(brush){
+    brush.x(function(){
+      console.log(this.x.$scale)
+      return this.x;
+    });
+    brush.y(function() {
+      return this.y;
+    });
+  });
 
   d3.select('#brushable')
   .datum(data)

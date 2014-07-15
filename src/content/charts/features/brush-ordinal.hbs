@@ -47,9 +47,6 @@ $(document).ready(function(){
         path.enter().append('path')
         .attr('class', d4.functor(scope.accessors.classes).bind(this))
         .attr('transform', function(d) {
-
-          // This is a bug we should not have to reset the rangePoints here.
-          this.x.rangePoints([0, this.width],1);
           return 'translate(' + this.x(d) + ',' + (this.height / 2) + ')';
         }.bind(this))
         .attr('d', d3.svg.symbol().type(String).size(this.height));
@@ -108,28 +105,44 @@ $(document).ready(function(){
     brush
 
     /*
+      Let this brush use the chart's x scale function to determine extents.
+    */
+    .x(this.x)
+
+    /*
       The `brushstart` method is invoked when the user first selects the brushable
       area with a click or touch.
     */
     .brushstart(function(){
-      d3.select('#ordinal_brush svg').classed('selecting', true);
-      console.log(d3.select('#ordinal_brush g.brush').select('rect'))
-      d3.select('#ordinal_brush .brush').selectAll('rect').attr('height', chart.height());
+      d3.select('#ordinal_brush svg')
+      .classed('selecting', true);
     })
+
     /*
       Everytime the user moves the brush this method sweeps the brushable elements
       looking for selections to add or remove.
     */
-    .brushmove('brush', function(){
-      var s = d3.event.target.extent();
-      d3.selectAll('.brushable').classed('selected', function(d) { return s[0] <= (d = chart.x.scale(d)) && d <= s[1]; });
+    .brushmove(function(){
+      var e = d3.event.target.extent();
+      d3.selectAll('.brushable').classed('selected', function(d) {
+        return e[0] <= (d = this.x(d)) && d <= e[1];
+      }.bind(this));
     })
+
     /*
       This method is called when the user releases their mouse or removes their
       finger from the touch device.
     */
     .brushend(function(){
       d3.select('#ordinal_brush svg').classed('selecting', !d3.event.target.empty());
+    })
+
+    /*
+      The selection function returns the svg group created by the feature. This
+      allows us to set the brush to the height of the chart by default.
+    */
+    .selection(function(selection){
+      selection.selectAll('rect').attr('height', this.height);
     });
   });
 
@@ -138,9 +151,8 @@ $(document).ready(function(){
   .call(chart);
 });
 </script>
-<div id="scatter">
-  <div id="ordinal_brush"></div>
-</div>
+<div id="ordinal_brush"></div>
+
 <h6>JavaScript Code</h6>
 <pre><code id="code" class="language-javascript"></code></pre>
 <h6>CSS</h6>
