@@ -276,16 +276,30 @@ svg.d4 {
     stroke: #f00;
 }
 
-#ordinal_brush circle {
-  -webkit-transition: fill-opacity 250ms linear !important;
-}
-#ordinal_brush .d4.selecting path {
-    fill-opacity: 0.2;
-}
-#ordinal_brush .d4.selecting path.selected {
-    stroke: #f00;
+path {
+  -webkit-transition: fill-opacity 250ms linear;
 }
 
+#ordinal_brush .selecting path {
+  fill-opacity: .2;
+}
+
+#ordinal_brush .selecting path.selected {
+  stroke: #f00;
+  stroke-width: 2px;
+}
+
+#ordinal_brush .axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+#ordinal_brush .brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
 
 #multi_scatter .d4 .grid.border rect {
     fill: none;
