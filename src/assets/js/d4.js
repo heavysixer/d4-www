@@ -2762,6 +2762,7 @@
   'use strict';
 
   d4.feature('brush', function(name) {
+    console.log('brush');
     var brush = d3.svg.brush();
     var setBrushScale = function(funct) {
 
@@ -2776,14 +2777,16 @@
     var brushDetectionFunction = function(e) {
       if(d4.isNull(brush.y())){
         return function(d) {
-          var selected = e[0] <= (d = this.x(d)) && d <= e[1];
+          var x = d[this.x.$key];
+          var selected = e[0] <= x && x <= e[1];
           return selected;
         }.bind(this);
       }
 
       if(d4.isNull(brush.x())) {
         return function(d) {
-          var selected = e[0] <= (d = this.y(d)) && d <= e[1];
+          var y = d[this.y.$key];
+          var selected = e[0] <= y && y <= e[1];
           return selected;
         }.bind(this);
       }

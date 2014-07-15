@@ -1,5 +1,5 @@
 ---
-title: Ordinal Brushes
+title: Ordinal Brush
 features:
   - Brushes
 ---
@@ -80,7 +80,7 @@ $(document).ready(function(){
   .using('xAxis', function(axis){
     axis.tickSize(10,5);
   })
-  .using('pathSeries', function(line){
+  .using('pathSeries', function(path){
 
     /*
       To make a svg element selectable by the brush simply give it the
@@ -92,7 +92,7 @@ $(document).ready(function(){
       handle the selection of brushable items. Check the other examples for
       a more detailed exploration of how brushes can be used in d4.
     */
-    line.classes(function () {
+    path.classes(function () {
       return 'brushable';
     });
   })

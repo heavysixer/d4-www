@@ -276,7 +276,7 @@ svg.d4 {
     stroke: #f00;
 }
 
-path {
+#ordinal_brush path {
   -webkit-transition: fill-opacity 250ms linear;
 }
 
