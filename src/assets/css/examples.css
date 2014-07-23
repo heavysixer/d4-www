@@ -336,10 +336,28 @@ svg.d4 {
     stroke: darkred;
     stroke-width: 1px;
 }
-
-#line_and_dot .d4 .series0 path, #time_series .d4 .series0 path {
+.dataPoint {
+    fill:none;
+}
+#line_and_dot .d4 .series0 path, #time_series .d4 .series0 path,  #time_series .lineSeriesLabels text.series0, #time_series .lineSeriesLabels .dataPoint.series0 {
     stroke: darkred;
 }
+#time_series .d4 .series1 path,  #time_series .lineSeriesLabels text.series1, #time_series .lineSeriesLabels .dataPoint.series1 {
+    stroke: green;
+}
+#time_series .d4 .series2 path,  #time_series .lineSeriesLabels text.series2, #time_series .lineSeriesLabels .dataPoint.series2 {
+    stroke: blue;
+}
+#time_series .d4 .series3 path,  #time_series .lineSeriesLabels text.series3, #time_series .lineSeriesLabels .dataPoint.series3 {
+    stroke: purple;
+}
+#time_series .d4 .series4 path,  #time_series .lineSeriesLabels text.series4, #time_series .lineSeriesLabels .dataPoint.series4 {
+    stroke: orange;
+}
+#time_series .d4 .series5 path,  #time_series .lineSeriesLabels text.series5, #time_series .lineSeriesLabels .dataPoint.series5 {
+    stroke: yellow;
+}
+
 
 #line_and_dot .d4 .series1 circle {
     fill: darkslategrey;

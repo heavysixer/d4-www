@@ -1,7 +1,7 @@
 ---
-title: Line Series Labels
+title: Tracking mouse X location
 features:
-  - Using Mouse Position
+  - Line Series Labels
 ---
 
 <h5>{{title}}</h5>
@@ -45,10 +45,6 @@ $(document).ready(function() {
       .outerWidth($('#time_series').width())
       .x(function(x) {
 
-        // Just like other scales you can specify a min or max you just
-        // need to make sure to parse the date first.
-        //x.min(parseDate('Nov 14, 2010'));
-
         // by default d4 makes the x axis ordinal so we'll set it to time
         // and use the date property of the data object as the key.
         x.scale('time');
@@ -61,8 +57,8 @@ $(document).ready(function() {
 
       .using('lineSeriesLabels', function(labels){
 
-        // By setting this to true we are enabling d4
-        labels.displayXValue(true);
+        // By setting this to true we are enabling d4 to track and then display a point along a line series.
+        labels.displayPointValue(true);
       });
 
     d3.select('#time_series')
@@ -76,4 +72,28 @@ $(document).ready(function() {
 <div id="time_series"></div>
 <h6>JavaScript Code</h6>
 <pre><code id="code" class="language-javascript"></code></pre>
+<h6>CSS</h6>
+<pre><code id="code" class="language-css">
+.dataPoint {
+    fill:none;
+}
+#time_series .d4 .series0 path,  #time_series .lineSeriesLabels text.series0, #time_series .lineSeriesLabels .dataPoint.series0 {
+    stroke: darkred;
+}
+#time_series .lineSeriesLabels text.series1, #time_series .lineSeriesLabels .dataPoint.series1 {
+    stroke: green;
+}
+#time_series .lineSeriesLabels text.series2, #time_series .lineSeriesLabels .dataPoint.series2 {
+    stroke: blue;
+}
+#time_series .lineSeriesLabels text.series3, #time_series .lineSeriesLabels .dataPoint.series3 {
+    stroke: purple;
+}
+#time_series .lineSeriesLabels text.series4, #time_series .lineSeriesLabels .dataPoint.series4 {
+    stroke: orange;
+}
+#time_series .lineSeriesLabels text.series5, #time_series .lineSeriesLabels .dataPoint.series5 {
+    stroke: yellow;
+}
+</code></pre>
 {{> disqus }}

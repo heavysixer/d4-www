@@ -1,6 +1,6 @@
-/*! d4 - v0.8.4
+/*! d4 - v0.8.6
  *  License: MIT Expat
- *  Date: 2014-07-15
+ *  Date: 2014-07-23
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -2762,7 +2762,6 @@
   'use strict';
 
   d4.feature('brush', function(name) {
-    console.log('brush');
     var brush = d3.svg.brush();
     var setBrushScale = function(funct) {
 
@@ -2775,7 +2774,7 @@
     };
 
     var brushDetectionFunction = function(e) {
-      if(d4.isNull(brush.y())){
+      if (d4.isNull(brush.y())) {
         return function(d) {
           var x = d[this.x.$key];
           var selected = e[0] <= x && x <= e[1];
@@ -2783,7 +2782,7 @@
         }.bind(this);
       }
 
-      if(d4.isNull(brush.x())) {
+      if (d4.isNull(brush.x())) {
         return function(d) {
           var y = d[this.y.$key];
           var selected = e[0] <= y && y <= e[1];
@@ -2804,9 +2803,6 @@
 
     var obj = {
       accessors: {
-        brush: function(obj) {
-          return obj;
-        },
         brushable: function() {
           return d3.selectAll('.brushable');
         },
@@ -2821,7 +2817,12 @@
         brushstart: function() {
           this.svg.classed('selecting', true);
         },
-        selection : function(selection) {
+        clamp: brush.clamp,
+        clear: brush.clear,
+        extent: brush.extent,
+        empty: brush.empty,
+        event: brush.event,
+        selection: function(selection) {
           return selection;
         },
         x: function() {
@@ -2843,9 +2844,9 @@
         }
 
         brush
-        .on('brushstart', d4.functor(scope.accessors.brushstart).bind(this))
-        .on('brush', d4.functor(scope.accessors.brushmove).bind(this))
-        .on('brushend', d4.functor(scope.accessors.brushend).bind(this));
+          .on('brushstart', d4.functor(scope.accessors.brushstart).bind(this))
+          .on('brush', d4.functor(scope.accessors.brushmove).bind(this))
+          .on('brushend', d4.functor(scope.accessors.brushend).bind(this));
         d4.appendOnce(selection, 'g.' + name)
           .call(brush);
 
@@ -3101,29 +3102,149 @@
 (function() {
   'use strict';
   /*
-   *
+   * Approach based off this example:
+   * http://bl.ocks.org/mbostock/3902569
    *
    * @name lineSeriesLabels
    */
   d4.feature('lineSeriesLabels', function(name) {
+    var addDataPoint = function(scope, data) {
+      var point = this.svg.select('.' + name).selectAll('.' + name + ' circle.dataPoint').data(data);
+      point.enter().append('circle');
+      point.exit().remove();
+      point.attr('data-key', function(d) {
+        return d.key;
+      })
+        .style('display', 'none')
+        .attr('r', d4.functor(scope.accessors.r).bind(this)())
+        .attr('class', function(d, n) {
+          return d4.functor(scope.accessors.classes).bind(this)(d, n) + ' dataPoint';
+        }.bind(this));
+    };
+
+    var addDataPointLabel = function(scope, data) {
+      var xLabel = this.svg.select('.' + name).selectAll('.' + name + ' text.dataPoint').data(data);
+      xLabel.enter().append('text');
+      xLabel.exit().remove();
+      xLabel
+        .attr('data-key', d4.functor(scope.accessors.key).bind(this))
+        .style('display', 'none')
+        .attr('class', function(d, n) {
+          return d4.functor(scope.accessors.classes).bind(this)(d, n) + ' dataPoint';
+        }.bind(this));
+    };
+
+    var addOverlay = function(scope) {
+      this.svg.select('.' + name).append('rect')
+        .attr('class', 'overlay')
+        .style('fill-opacity', 0)
+        .attr('width', this.width)
+        .attr('height', this.height)
+        .on('mouseover', function() {
+          this.svg.selectAll('.' + name + ' .dataPoint').style('display', null);
+        }.bind(this))
+        .on('mouseout', function() {
+          this.svg.selectAll('.' + name + ' .dataPoint').style('display', 'none');
+        }.bind(this))
+        .on('mousemove', d4.functor(scope.accessors.mouseMove).bind(this));
+
+    };
+
+    var displayXValue = function(scope, data) {
+      if (d4.functor(scope.accessors.displayPointValue).bind(this)()) {
+        if (d4.isNotFunction(this.x.invert)) {
+          d4.err(' In order to track the x position of a line series your scale must have an invert() function.  However, your {0} scale does not have the invert() function.', this.x.$scale);
+        } else {
+          addDataPointLabel.bind(this)(scope, data);
+          addDataPoint.bind(this)(scope, data);
+          addOverlay.bind(this)(scope);
+        }
+      }
+    };
+
     return {
       accessors: {
-        x: function(d) {
-          return this.x(d.values[d.values.length - 1][this.x.$key]);
+        classes: function(d, n) {
+          return 'stroke series' + n;
         },
 
-        y: function(d) {
-          return this.y(d.values[d.values.length - 1][this.y.$key]);
+        displayPointValue: false,
+
+        key: function(d) {
+          return d.key;
+        },
+
+        mouseMove: function(data) {
+          var inRange = function(a, b) {
+            if (this.x.$scale === 'time') {
+              return a.getTime() >= b[this.x.$key].getTime();
+            } else {
+              return a >= b[this.x.$key];
+            }
+          };
+
+          var bisectX = d3.bisector(function(d) {
+            return d[this.x.$key];
+          }.bind(this)).right;
+          var overlay = this.svg.select('.' + name + ' rect.overlay')[0][0];
+          var x0 = this.x.invert(d3.mouse(overlay)[0]);
+          d4.each(data, function(datum, n) {
+            var i = bisectX(datum.values, x0, 1);
+            var d0 = datum.values[i - 1];
+            if (inRange.bind(this)(x0, d0)) {
+              var d1 = datum.values[i];
+              d1 = (d4.isUndefined(d1)) ? datum.values[datum.values.length - 1] : d1;
+              var d = x0 - d0[this.x.$key] > d1[this.x.$key] - x0 ? d1 : d0;
+              d4.functor(this.features[name].accessors.showDataPoint).bind(this)(d, datum, n);
+              d4.functor(this.features[name].accessors.showDataLabel).bind(this)(d, datum, n);
+            } else {
+              var selector = '.' + name + ' .dataPoint[data-key="' + datum.key + '"]';
+              var point = this.svg.select(selector);
+              point
+                .style('display', 'none');
+            }
+          }.bind(this));
+        },
+
+        pointLabelText: function(d, datum) {
+          var str = datum.key + ' ' + this.x.$key + ': ' + d[this.x.$key];
+          str += ' ' + this.y.$key + ': ' + d[this.y.$key];
+          return str;
+        },
+
+        r: 4.5,
+
+        showDataLabel: function(d, datum, n) {
+          var pointLabelSelector = '.' + name + ' text.dataPoint[data-key="' + datum.key + '"]';
+          var label = this.svg.select(pointLabelSelector);
+          var offset = n * 20;
+          label
+            .style('display', null)
+            .attr('transform', 'translate(5,' + offset + ')')
+            .text(d4.functor(this.features[name].accessors.pointLabelText).bind(this)(d, datum));
+        },
+
+        showDataPoint: function(d, datum) {
+          var pointSelector = '.' + name + ' circle.dataPoint[data-key="' + datum.key + '"]';
+          var point = this.svg.select(pointSelector);
+          point
+            .style('display', null)
+            .attr('transform', 'translate(' + this.x(d[this.x.$key]) + ',' + this.y(d[this.y.$key]) + ')');
         },
 
         text: function(d) {
           return d.key;
         },
 
-        classes: function(d, n) {
-          return 'stroke series' + n;
+        x: function(d) {
+          return this.x(d.values[d.values.length - 1][this.x.$key]);
+        },
+
+        y: function(d) {
+          return this.y(d.values[d.values.length - 1][this.y.$key]);
         }
       },
+
       render: function(scope, data, selection) {
         selection.append('g').attr('class', name);
         var label = this.svg.select('.' + name).selectAll('.' + name).data(data);
@@ -3133,10 +3254,12 @@
           .text(d4.functor(scope.accessors.text).bind(this))
           .attr('x', d4.functor(scope.accessors.x).bind(this))
           .attr('y', d4.functor(scope.accessors.y).bind(this))
-          .attr('data-key', function(d) {
-            return d.key;
-          })
-          .attr('class', d4.functor(scope.accessors.classes).bind(this));
+          .attr('data-key', d4.functor(scope.accessors.key).bind(this))
+          .attr('class', function(d, n) {
+            return d4.functor(scope.accessors.classes).bind(this)(d, n) + ' seriesLabel';
+          }.bind(this));
+        displayXValue.bind(this)(scope, data, selection);
+
         return label;
       }
     };
@@ -3151,7 +3274,7 @@
    */
   d4.feature('lineSeries', function(name) {
     var line = d3.svg.line();
-    line.interpolate('basis');
+    line.interpolate('linear');
     return {
       accessors: {
         classes: function(d, n) {
@@ -4011,6 +4134,7 @@
   d4.feature('xAxis', function(name) {
     var axis = d3.svg.axis()
       .orient('bottom')
+      .tickPadding(10)
       .tickSize(0);
 
     var textRect = function(text, klasses) {
@@ -4139,6 +4263,7 @@
   d4.feature('yAxis', function(name) {
     var axis = d3.svg.axis()
       .orient('left')
+      .tickPadding(10)
       .tickSize(0);
 
     var textRect = function(text, klasses) {
@@ -4834,7 +4959,7 @@
       }
     }
 
-    if (!axis.range.$dirty && !axis.rangeRound.$dirty) {
+    if (!axis.range.$dirty) {
       axis.range(rangeFor(chart, dimension));
     }
 
