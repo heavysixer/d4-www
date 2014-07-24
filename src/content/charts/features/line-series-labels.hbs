@@ -7,7 +7,8 @@ features:
 <h5>{{title}}</h5>
 <p>
   This example demonstrates a line chart where the line series labels have been
-  configured to return the closest value based on the mouse location.
+  configured to return the closest value based on the mouse location. For more
+  details on the specific accessors available to this feature consult the <a href="https://github.com/heavysixer/d4/blob/master/src/features/line-series-labels.js#L65">source code</a>.
 </p>
 <hr/>
 <script type="text/javascript" charset="utf-8" id='source_code'>
@@ -58,7 +59,12 @@ $(document).ready(function() {
       .using('lineSeriesLabels', function(labels){
 
         // By setting this to true we are enabling d4 to track and then display a point along a line series.
-        labels.displayPointValue(true);
+        labels.displayPointValue(true)
+        .pointLabelText(function(d, datum){
+          if(d[this.y.$key] !== null) {
+            return datum.key + ' ' + d[this.y.$key];
+          }
+        });
       });
 
     d3.select('#time_series')
