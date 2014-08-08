@@ -1,6 +1,6 @@
-/*! d4 - v0.8.6
+/*! d4 - v0.8.9
  *  License: MIT Expat
- *  Date: 2014-07-23
+ *  Date: 2014-08-08
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -342,6 +342,7 @@
     opts.mixins.forEach(function(name) {
       parsedData = prepareDataForFeature(opts, name, data);
       selection = opts.features[name].render.bind(opts)(opts.features[name], parsedData, opts.chartArea);
+      opts.features[name].accessors.afterRender.bind(opts)(opts.features[name], parsedData, opts.chartArea, selection);
       addEventsProxy(opts.features[name], selection);
     });
   };
@@ -438,6 +439,7 @@
     };
     feature.on = function() {
       feature._proxiedFunctions.on.push(Array.prototype.slice.call(arguments));
+      return feature;
     };
   };
 
@@ -464,6 +466,9 @@
       var name = mixin.name;
       var overrides = extractOverrides.bind(this)(mixin, name);
       var baseFeature = {
+        accessors: {
+          afterRender: function() {},
+        },
         proxies: []
       };
       mixin[name] = d4.merge(d4.merge(baseFeature, mixin.feature(name)), overrides);
@@ -910,6 +915,10 @@
     });
   };
 
+  d4.defaultKey = function(d, i) {
+    return (d.key || 0) + '_' + i;
+  };
+
   /**
    * Helper method to extend one object with the attributes of another.
    *
@@ -1221,7 +1230,7 @@
   d4.helpers.staggerTextHorizontally = function(text, direction) {
     var move = function(lastRect, rect) {
       var text = d3.select(this);
-      var lastOffset = text.attr('data-last-horizontal-offset') || 1;
+      var lastOffset = +(text.attr('data-last-horizontal-offset') || 1);
       var left = lastRect.left - rect.left;
       var offset = (rect.width - left + lastOffset) * direction;
       text.attr('transform', 'translate(' + offset + ', 0)');
@@ -2500,9 +2509,7 @@
 
         duration: 750,
 
-        key: function(d, i) {
-          return (d.key || 0) + i;
-        },
+        key: d4.functor(d4.defaultKey),
 
         text: function(d) {
           return d.value;
@@ -2617,9 +2624,7 @@
 
         duration: 750,
 
-        key: function(d, i) {
-          return (d.key || 0) + i;
-        },
+        key: d4.functor(d4.defaultKey),
 
         x: function() {
           return this.width / 2;
@@ -2852,6 +2857,7 @@
 
         scope.accessors.selection.bind(this)(selection.select('.brush'));
         scope.accessors.brush.bind(this)(brush);
+        return brush;
       }
     };
     return obj;
@@ -2878,9 +2884,7 @@
     };
     return {
       accessors: {
-        key: function(d, i) {
-          return (d.key || 0) + i;
-        },
+        key: d4.functor(d4.defaultKey),
 
         x: function(d) {
           if (d4.isOrdinalScale(this.x)) {
@@ -2978,6 +2982,7 @@
           .call(formattedYAxis
             .tickSize(-this.width, 0, 0)
             .tickFormat(''));
+        return selection;
       }
     };
   });
@@ -3039,9 +3044,7 @@
           }
         },
 
-        key: function(d, i) {
-          return (d.key || 0) + i;
-        },
+        key: d4.functor(d4.defaultKey),
 
         rx: 0,
 
@@ -3112,9 +3115,7 @@
       var point = this.svg.select('.' + name).selectAll('.' + name + ' circle.dataPoint').data(data);
       point.enter().append('circle');
       point.exit().remove();
-      point.attr('data-key', function(d) {
-        return d.key;
-      })
+      point.attr('data-key', d4.functor(scope.accessors.key).bind(this))
         .style('display', 'none')
         .attr('r', d4.functor(scope.accessors.r).bind(this)())
         .attr('class', function(d, n) {
@@ -3170,9 +3171,7 @@
 
         displayPointValue: false,
 
-        key: function(d) {
-          return d.key;
-        },
+        key: d4.functor(d4.defaultKey),
 
         mouseMove: function(data) {
           var inRange = function(a, b) {
@@ -3198,7 +3197,7 @@
               d4.functor(this.features[name].accessors.showDataPoint).bind(this)(d, datum, n);
               d4.functor(this.features[name].accessors.showDataLabel).bind(this)(d, datum, n);
             } else {
-              var selector = '.' + name + ' .dataPoint[data-key="' + datum.key + '"]';
+              var selector = '.' + name + ' .dataPoint[data-key="' + d4.functor(this.features[name].accessors.key).bind(this)(datum, n) + '"]';
               var point = this.svg.select(selector);
               point
                 .style('display', 'none');
@@ -3215,7 +3214,7 @@
         r: 4.5,
 
         showDataLabel: function(d, datum, n) {
-          var pointLabelSelector = '.' + name + ' text.dataPoint[data-key="' + datum.key + '"]';
+          var pointLabelSelector = '.' + name + ' text.dataPoint[data-key="' + d4.functor(this.features[name].accessors.key).bind(this)(datum, n) + '"]';
           var label = this.svg.select(pointLabelSelector);
           var offset = n * 20;
           label
@@ -3224,8 +3223,8 @@
             .text(d4.functor(this.features[name].accessors.pointLabelText).bind(this)(d, datum));
         },
 
-        showDataPoint: function(d, datum) {
-          var pointSelector = '.' + name + ' circle.dataPoint[data-key="' + datum.key + '"]';
+        showDataPoint: function(d, datum, n) {
+          var pointSelector = '.' + name + ' circle.dataPoint[data-key="' + d4.functor(this.features[name].accessors.key).bind(this)(datum, n) + '"]';
           var point = this.svg.select(pointSelector);
           point
             .style('display', null)
@@ -3281,9 +3280,7 @@
           return 'line stroke series' + n;
         },
 
-        key: function(d, i) {
-          return (d.key || 0) + i;
-        },
+        key: d4.functor(d4.defaultKey),
 
         x: function(d) {
           return this.x(d[this.x.$key]);
@@ -3314,6 +3311,7 @@
           .attr('d', function(d) {
             return line(d.values);
           });
+        return group;
       }
     };
   });
@@ -3522,9 +3520,7 @@
       accessors: {
         classes: 'column-label',
 
-        key: function(d, n) {
-          return (d.key || 0) + n;
-        },
+        key: d4.functor(d4.defaultKey),
 
         stagger: true,
 
@@ -3667,9 +3663,7 @@
         classes: function(d, i) {
           return 'bar fill item' + i + ' ' + sign(d[this.valueKey]) + ' ' + d[this.y.$key];
         },
-        key: function(d, i) {
-          return (d.key || 0) + i;
-        }
+        key: d4.functor(d4.defaultKey)
       },
 
       render: function(scope, data, selection) {
@@ -4208,6 +4202,7 @@
           positionText.bind(this)(title, aligned, 'title');
           positionText.bind(this)(subtitle, aligned, 'subtitle');
         }
+        return group;
       }
     };
     return obj;
@@ -4341,7 +4336,7 @@
           positionText.bind(this)(subtitle, aligned, 'subtitle');
           positionText.bind(this)(title, aligned, 'title');
         }
-
+        return group;
       }
     };
     return obj;
@@ -4682,8 +4677,9 @@
       findValues(opts, opts.data);
       opts.data = removeUndefinedValues(opts.data);
       opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
-
-      stackByDimension(opts.x.key, opts.data);
+      if (opts.data.length > 0) {
+        stackByDimension(opts.x.key, opts.data);
+      }
       return opts;
     };
 
@@ -4891,8 +4887,9 @@
 
       findValues(opts, opts.data);
       opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
-
-      stackByDimension(opts.x.key, opts.data);
+      if (opts.data.length > 0) {
+        stackByDimension(opts.x.key, opts.data);
+      }
       return opts;
     };
 

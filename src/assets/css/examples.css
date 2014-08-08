@@ -339,6 +339,10 @@ svg.d4 {
 .dataPoint {
     fill:none;
 }
+.hatch {
+    stroke: #fff !important;
+    pointer-events: none;
+}
 #line_and_dot .d4 .series0 path, #time_series .d4 .series0 path,  #time_series .lineSeriesLabels text.series0, #time_series .lineSeriesLabels .dataPoint.series0 {
     stroke: darkred;
 }

@@ -12,19 +12,22 @@ charts:
 <script type="text/javascript" charset="utf-8" id='source_code'>
 'use strict';
 
-$(document).ready(function(){
-  var data = [
-      { x: '2010', y:-10 },
-      { x: '2011', y:20 },
-      { x: '2012', y:30 },
-      { x: '2013', y:40 },
-      { x: '2014', y:50 },
-    ];
+$(document).ready(function() {
+  var graphData = [];
+
+  for (var i = 25; i > 0; i--) {
+    graphData.push({
+      x: i,
+      y: i
+    });
+  }
+
   var chart = d4.charts.column();
   d3.select('#example')
-  .datum(data)
-  .call(chart);
+    .datum(graphData)
+    .call(chart);
 });
+
 
 </script>
 <div id="example"></div>
