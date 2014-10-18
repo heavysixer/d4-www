@@ -41,7 +41,7 @@ $(document).ready(function() {
 
           // Hatch pattern based off this example:
           // http://stackoverflow.com/questions/13069446/simple-fill-pattern-in-svg-diagonal-hatching
-          var defs = this.svg.select('defs');
+          var defs = this.container.select('defs');
           d4.appendOnce(defs, 'pattern')
             .attr('id', 'diagonalHatch')
             .attr('patternUnits', 'userSpaceOnUse')
