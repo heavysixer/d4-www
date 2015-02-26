@@ -57,7 +57,9 @@ $(document).ready(function(){
     x.key('year');
   })
   .y(function(y){
-    y.key('unitsSold');
+    y
+    .key('unitsSold');
+
   })
   .mixin({
     'name' : 'zeroLine',

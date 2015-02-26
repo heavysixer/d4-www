@@ -185,6 +185,7 @@ module.exports = function(grunt) {
     concurrent: {
       server: [
         'copy:styles',
+        'copy:bower'
       ],
       test: [
         'copy:styles',
