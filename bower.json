@@ -1,0 +1,21 @@
+{
+  "name": "d4-www",
+  "version": "0.0.0",
+  "homepage": "https://github.com/heavysixer/d4-www",
+  "authors": [
+    "Mark Daggett <mark@humansized.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.2",
+    "d3": "~3.5.5",
+    "jquery": "~2.1.3"
+  }
+}
