@@ -172,17 +172,27 @@ module.exports = function(grunt) {
           dest: '.tmp/assets/css',
           src: ['{,*/}*.css']
         }]
+      },
+      bower: {
+        files: [{
+          expand: true,
+          cwd: './bower_components',
+          dest: '.tmp/bower_components',
+          src: ['**/*.*']
+        }]
       }
     },
     concurrent: {
       server: [
-        'copy:styles'
+        'copy:styles',
       ],
       test: [
-        'copy:styles'
+        'copy:styles',
+        'copy:bower'
       ],
       dist: [
-        'copy:styles'
+        'copy:styles',
+        'copy:bower'
       ]
     },
     mox: {
