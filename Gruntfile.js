@@ -185,13 +185,14 @@ module.exports = function(grunt) {
     concurrent: {
       server: [
         'copy:styles',
-        'copy:bower'
       ],
       test: [
-        'copy:styles'
+        'copy:styles',
+        'copy:bower'
       ],
       dist: [
-        'copy:styles'
+        'copy:styles',
+        'copy:bower'
       ]
     },
     mox: {
