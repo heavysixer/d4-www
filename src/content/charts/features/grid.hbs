@@ -48,10 +48,16 @@ $(document).ready(function(){
   .x(function(x){
     x.key('year');
   })
+  .x1(function(x1){
+    x1.key('salesman');
+  })
   .y(function(y){
     y.key('unitsSold')
     .max(800);
   })
+  /*.using('xAxis', function(axis) {*/
+    /*axis.rangeBands(0.1);*/
+  /*})*/
   .groupsOf(parsedData.data[0].values.length)
 
   // supplying an index allows us to mix the grid in at the zero index which
