@@ -223,6 +223,7 @@ module.exports = function(grunt) {
           '.tmp/': ['<%= app.src %>/templates/pages/*.hbs'],
           '.tmp/charts/column/': ['<%= app.src %>/content/charts/column/*.hbs'],
           '.tmp/charts/donut/': ['<%= app.src %>/content/charts/donut/*.hbs'],
+          '.tmp/charts/dynamic/': ['<%= app.src %>/content/charts/dynamic/*.hbs'],
           '.tmp/charts/features/': ['<%= app.src %>/content/charts/features/*.hbs'],
           '.tmp/charts/grouped-column/': ['<%= app.src %>/content/charts/grouped-column/*.hbs'],
           '.tmp/charts/line/': ['<%= app.src %>/content/charts/line/*.hbs'],
