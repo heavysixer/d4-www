@@ -59,6 +59,9 @@ $(document).ready(function(){
     // This also shows how d4 transparently passes the appropriate calls to d3.
     y.rangeRoundBands([0, chart.height()], 0.2, 0.1);
   })
+  .groups(function(groups){
+    groups.key('salesman');
+  })
   .valueKey('unitsSold')
   .x(function(x){
     x.key('unitsSold');

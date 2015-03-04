@@ -49,6 +49,9 @@ $(document).ready(function(){
     .x(function(x){
       x.key('year');
     })
+    .groups(function(groups) {
+      groups.key('salesman');
+    })
     .y(function(y){
       y.key('unitsSold')
       .max(800);
