@@ -4,3 +4,4 @@ reports
 .tmp
 bower_components
 dist
+deploy_notes.md

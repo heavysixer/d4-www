@@ -57,6 +57,9 @@ $(document).ready(function(){
     y.key('unitsSold')
     .max(800);
   })
+  .groups(function(groups) {
+    groups.key('salesman');
+  })
   .using('yAxis', function(axis){
 
     // adjust the number of tick marks based on the height of the chart
