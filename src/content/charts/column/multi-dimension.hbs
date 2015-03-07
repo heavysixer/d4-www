@@ -138,16 +138,29 @@ $(document).ready(function() {
     'name': 'lineSeriesLabels',
     'feature': d4.features.lineSeriesLabels
   })
-  .using('lineSeriesLabels', function(label) {
-    label.beforeRender(orangeFilter);
-  });
+  .mixout('lineSeriesLabels');
 
-  d3.select('#example')
+  d3.select('#multi_scale')
   .datum(data)
   .call(chart);
 });
 </script>
-<div id="example"></div>
+<div id="multi_scale"></div>
+<h6>CSS Code</h6>
+<pre><code class="language-css">
+#multi_scale .y.axis {
+    fill: none;
+    stroke: #002960;
+    stroke-width: 1px;
+}
+
+#multi_scale .z.axis, #multi_scale .lineSeries path {
+    fill: none;
+    stroke: #cc0000;
+    stroke-width: 1px;
+}
+</code></pre>
+
 <h6>JavaScript Code</h6>
 <pre><code id="code" class="language-javascript"></code></pre>
 {{> disqus }}

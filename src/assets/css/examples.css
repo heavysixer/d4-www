@@ -329,6 +329,17 @@ svg.d4 {
     stroke: darkslategrey;
     stroke-width: 2px;
 }
+#multi_scale .y.axis {
+    fill: none;
+    stroke: #002960;
+    stroke-width: 1px;
+}
+
+#multi_scale .z.axis, #multi_scale .lineSeries path {
+    fill: none;
+    stroke: #cc0000;
+    stroke-width: 1px;
+}
 
 #line_and_dot .d4 .series0 circle {
     fill: darkred;
