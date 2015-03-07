@@ -116,7 +116,8 @@ $(document).ready(function() {
   })
   .using('rightAxis', function(axis) {
     axis
-      .orient('right')
+    .scaleId('z')
+    .orient('right')
     .align('right');
   })
   .mixin({
