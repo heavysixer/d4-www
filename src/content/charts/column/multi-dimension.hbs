@@ -1,0 +1,152 @@
+---
+title: Multiple Scales Per Chart
+concepts:
+  - Basic Concepts
+---
+<h5>{{title}}</h5>
+<p>
+  The following demonstrates how you can assign multiple scales to a chart. This is a common tactic in data visualization
+  where the intent is to visually reference two distinct data series that have different scales within the same chart.
+</p>
+<hr/>
+<script type="text/javascript" charset="utf-8" id='source_code'>
+'use strict';
+
+$(document).ready(function() {
+  var data = [{
+    'key': 'Apples',
+    'type': 'column',
+    'values': [{
+      'item': 'travelability',
+      'value': 300,
+    }, {
+      'item': 'flavor',
+      'value': 200,
+    }, {
+      'item': 'color',
+      'value': 100,
+    }, {
+      'item': 'juicyness',
+      'value': 400,
+    }]
+  }, {
+    'key': 'Oranges',
+    'type': 'line',
+    'values': [{
+      'item': 'travelability',
+      'value': 7,
+    }, {
+      'item': 'flavor',
+      'value': 13,
+    }, {
+      'item': 'color',
+      'value': 10,
+    }, {
+      'item': 'juicyness',
+      'value': 23,
+    }]
+  }];
+
+  /*
+   * In order to split the incoming data into the various series we want to render
+   * we must filter out the data for each series. This is easily accomplished using
+   * the `beforeRender` function in each feature.
+   */
+
+  // The bar series will display only values about Apples
+  var appleFilter = function(data) {
+    return data.filter(function(obj) {
+      return obj.key === 'Apples';
+    });
+  };
+
+  // The line series will display onle values about Oranges
+  var orangeFilter = function(data) {
+    return data.filter(function(obj) {
+      return obj.key === 'Oranges';
+    });
+  };
+
+  var chart = d4.charts.column({
+    config: {
+      axes: {
+        z: {
+          scale: 'linear'
+        }
+      }
+    }
+  })
+  .outerHeight(300)
+  .outerWidth(600)
+  .margin({
+    top: 10,
+    bottom: 50,
+    left: 50,
+    right: 50
+  })
+  .x(function(x) {
+    x.key('item');
+  })
+  .y(function(y) {
+    y.key('value');
+  })
+  .z(function(z) {
+    /*
+     At this step we configure the scale we injected during the config step.
+    We loop through the available data and set the values of the scale based
+    on what was returned.
+    */
+    z.scale('linear')
+      .range([this.height, 0])
+      .domain([0, d3.max(orangeFilter(data)[0].values,function(i){
+        return i.value;
+      })])
+      .key('value');
+  });
+  chart
+  .using('bars', function(bars) {
+    bars.beforeRender(appleFilter);
+  })
+  .using('barLabels', function(barLabels) {
+    barLabels.beforeRender(appleFilter);
+  })
+  .mixin({
+    'name': 'rightAxis',
+    'feature': d4.features.yAxis
+  })
+  .using('rightAxis', function(axis) {
+    axis
+      .orient('right')
+    .align('right');
+  })
+  .mixin({
+    'name': 'lineSeries',
+    'feature': d4.features.lineSeries
+  })
+  .using('lineSeries', function(line) {
+    line
+      .beforeRender(orangeFilter)
+      .y(function(d){
+        return this.z(d[this.z.$key]);
+      })
+      .x(function(d) {
+        return this.x(d[this.x.$key]) + this.x.rangeBand() / 2;
+      });
+  })
+  .mixin({
+    'name': 'lineSeriesLabels',
+    'feature': d4.features.lineSeriesLabels
+  })
+  .using('lineSeriesLabels', function(label) {
+    label.beforeRender(orangeFilter);
+  });
+
+  d3.select('#example')
+  .datum(data)
+  .call(chart);
+});
+</script>
+<div id="example"></div>
+<h6>JavaScript Code</h6>
+<pre><code id="code" class="language-javascript"></code></pre>
+{{> disqus }}
