@@ -98,17 +98,25 @@ $(document).ready(function() {
     */
     z.scale('linear')
       .range([this.height, 0])
-      .domain([0, d3.max(orangeFilter(data)[0].values,function(i){
+      .domain(d3.extent(orangeFilter(data)[0].values,function(i){
         return i.value;
-      })])
+      }))
       .key('value');
   });
   chart
   .using('bars', function(bars) {
-    bars.beforeRender(appleFilter);
+    bars
+    .beforeRender(orangeFilter)
+    .yScaleId('z')
+    .y(function(d){
+        return this.z(d[this.z.$key]);
+      });
   })
   .using('barLabels', function(barLabels) {
-    barLabels.beforeRender(appleFilter);
+    barLabels.beforeRender(orangeFilter)
+    .y(function(d){
+        return this.z(d[this.z.$key]) - 10;
+      });
   })
   .mixin({
     'name': 'rightAxis',
@@ -126,10 +134,7 @@ $(document).ready(function() {
   })
   .using('lineSeries', function(line) {
     line
-      .beforeRender(orangeFilter)
-      .y(function(d){
-        return this.z(d[this.z.$key]);
-      })
+      .beforeRender(appleFilter)
       .x(function(d) {
         return this.x(d[this.x.$key]) + this.x.rangeBand() / 2;
       });
@@ -142,21 +147,20 @@ $(document).ready(function() {
 
   d3.select('#multi_scale')
   .datum(data)
-  .call(chart);
-});
+  .call(chart);});
 </script>
 <div id="multi_scale"></div>
 <h6>CSS Code</h6>
 <pre><code class="language-css">
-#multi_scale .y.axis {
+#multi_scale .y.axis, #multi_scale .lineSeries path {
     fill: none;
-    stroke: #002960;
+    stroke: #cc0000;
     stroke-width: 1px;
 }
 
-#multi_scale .z.axis, #multi_scale .lineSeries path {
+#multi_scale .z.axis {
     fill: none;
-    stroke: #cc0000;
+    stroke: #002960;
     stroke-width: 1px;
 }
 </code></pre>

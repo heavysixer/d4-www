@@ -329,15 +329,15 @@ svg.d4 {
     stroke: darkslategrey;
     stroke-width: 2px;
 }
-#multi_scale .y.axis {
+#multi_scale .y.axis, #multi_scale .lineSeries path {
     fill: none;
-    stroke: #002960;
+    stroke: #cc0000;
     stroke-width: 1px;
 }
 
-#multi_scale .z.axis, #multi_scale .lineSeries path {
+#multi_scale .z.axis {
     fill: none;
-    stroke: #cc0000;
+    stroke: #002960;
     stroke-width: 1px;
 }
 
