@@ -57,9 +57,6 @@ $(document).ready(function(){
     .y(function(y){
       y.key('unitsSold');
     })
-    .using('lineSeries', function(line) {
-      line.interpolate('cardinal');
-    })
     .mixin({
       'name' : 'dotSeries',
       'feature' : d4.features.circleSeries,
@@ -70,16 +67,16 @@ $(document).ready(function(){
       'feature' : d4.features.stackedLabels,
       'index' : 3
     })
-    .using('labels', function(labels){
-      labels.textAnchor('end');
+    .using('lineSeries', function(line){
+      line.x(function(d){
+        var size = this.x(this.x.domain()[0]);
+        return this.x(d[this.x.$key]) + size;
+      });
     })
     .using('dotSeries', function(dot) {
       dot
       .r(function() {
         return 5;
-      })
-      .cx(function(d) {
-        return this.x(d[this.x.$key]);
       })
       .cy(function(d) {
         return this.y(d[this.y.$key]);
