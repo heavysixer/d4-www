@@ -65,6 +65,14 @@ $(document).ready(function(){
       'feature' : d4.features.circleSeries,
       'index' : 2
     })
+    .mixin({
+      'name' : 'labels',
+      'feature' : d4.features.stackedLabels,
+      'index' : 3
+    })
+    .using('labels', function(labels){
+      labels.textAnchor('end');
+    })
     .using('dotSeries', function(dot) {
       dot
       .r(function() {

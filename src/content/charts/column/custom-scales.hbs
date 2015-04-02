@@ -56,7 +56,7 @@ $(document).ready(function() {
           cumulativeX += d[this.x.$key];
           return this.x(cumulativeX - d[this.x.$key]);
         })
-        .width(function(d) {
+        .width(function(scaleId, d) {
           return this.x(d[this.x.$key]);
         });
     })
