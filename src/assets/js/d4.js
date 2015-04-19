@@ -1,6 +1,6 @@
-/*! d4 - v0.9.3
+/*! d4 - v0.9.4
  *  License: MIT Expat
- *  Date: 2015-04-02
+ *  Date: 2015-04-14
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -2099,9 +2099,10 @@
           beforeRender: function(data) {
             return calculateStackTotals.bind(this)(data);
           },
-          y: function(d) {
+          y: function(yScaleId, d) {
+            var axis = this[yScaleId];
             var padding = 5;
-            return this.y(d.size) - padding;
+            return axis(d.size) - padding;
           }
         }
       };
@@ -2318,7 +2319,7 @@
           }
         },
 
-        width: function(d) {
+        width: function(dimension, d) {
           if (d4.isOrdinalScale(this.x)) {
             return this.x.rangeBand();
           } else {
@@ -2326,7 +2327,7 @@
           }
         },
 
-        height: function(d) {
+        height: function(dimension, d) {
           if (d4.isContinuousScale(this.y)) {
             return Math.abs(this.y(d.y0) - this.y(d.y0 + d.y));
           } else {

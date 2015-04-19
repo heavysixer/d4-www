@@ -1,0 +1,144 @@
+---
+title: Force Layout
+charts:
+  - Layouts
+---
+<h5>{{title}}</h5>
+<p>
+  D3 has a rich collection of <a href="https://github.com/mbostock/d3/wiki/Layouts" target="_blank">layouts</a> which provide a way to organize your data spatially using algorithms.
+  This example demonstrates how we can use the force layout with a simple d4 chart. This example is based off Mike Bostock's
+  <a href="http://bl.ocks.org/mbostock/3231298" target="_blank">collision detection demo</a>.
+  <dl>
+    <dt>Accessors</dt>
+    <dd><code>circles</code> - series of circles</dd>
+    <dd><code>xAxis</code> - the axis for the <code>x</code> dimension</dd>
+    <dd><code>yAxis</code> - the axis for the <code>y</code> dimension</dd>
+   </dl>
+</p>
+
+<hr/>
+<script type="text/javascript" charset="utf-8" id='source_code'>
+'use strict';
+
+$(document).ready(function() {
+  var $example = $('#example');
+
+  // collision detection routine
+  var collide = function(node) {
+    var r = node.radius + 16,
+      nx1 = node.x - r,
+      nx2 = node.x + r,
+      ny1 = node.y - r,
+      ny2 = node.y + r;
+    return function(quad, x1, y1, x2, y2) {
+      if (quad.point && (quad.point !== node)) {
+        var x = node.x - quad.point.x,
+          y = node.y - quad.point.y,
+          l = Math.sqrt(x * x + y * y),
+          r = node.radius + quad.point.radius;
+        if (l < r) {
+          l = (l - r) / l * 0.5;
+          node.x -= x *= l;
+          node.y -= y *= l;
+          quad.point.x += x;
+          quad.point.y += y;
+        }
+      }
+      return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+    };
+  };
+
+  // Create 200 data elements which we can draw to the screen.
+  var nodes = d3.range(10).map(function() {
+    return {
+      radius: 10
+    };
+  });
+
+  d4.feature('forcedCircle', function(name) {
+    var force = d3.layout.force();
+    return {
+      accessors: {},
+      force: force,
+      render: function(scope, data, selection) {
+        var group = d4.appendOnce(selection, 'g.' + name);
+        var circles = group.selectAll('circle')
+          .data(data)
+          .enter().append('circle')
+          .attr('data-index', function(d, i) {
+            return i;
+          })
+          .attr('r', function(d) {
+            return d.radius;
+          });
+        return circles;
+      }
+    };
+  });
+
+  var chart = d4.baseChart({
+    config: {
+      axes: {
+        x: {
+          scale: 'linear'
+        },
+        y: {
+          scale: 'linear'
+        }
+      }
+    }
+  })
+    .mixin([{
+      'name': 'circles',
+      'feature': d4.features.forcedCircle
+    }])
+    .using('circles', function(circle) {
+      circle.beforeRender(function(data){
+        var d = data.map(function(d) {
+          return d.values;
+        })[0];
+        circle.force
+        .gravity(0.09)
+        .charge(function() {
+          return 1 ? 0 : -2000;
+        })
+        .nodes(d)
+        .size([this.width, this.height])
+        .start();
+        return d;
+      });
+      circle.afterRender(function(scope, data, selection) {
+        circle.force.on('tick', function() {
+          var q = d3.geom.quadtree(data),
+            i = 0,
+            n = data.length;
+
+          while (++i < n) {
+            q.visit(collide(data[i]));
+          }
+
+          selection.selectAll('circle')
+            .attr('cx', function(d) {
+              return d.x;
+            })
+            .attr('cy', function(d) {
+              return d.y;
+            });
+        });
+      });
+    })
+    .outerWidth($example.width())
+    .outerHeight($example.height());
+
+  d3.select($example[0])
+    .datum(nodes)
+    .call(chart);
+});
+
+</script>
+<div id="force">
+  <div id="example"></div>
+</div>
+<h6>JavaScript Code</h6>
+<pre><code id="code" class="language-javascript"></code></pre>
+{{> disqus }}

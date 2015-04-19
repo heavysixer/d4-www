@@ -409,3 +409,8 @@ svg.d4 {
     stroke: darkred;
     stroke-width: 5px;
 }
+
+#force #example{
+    width: 960px;
+    height:500px;
+}
