@@ -49,7 +49,7 @@ $(document).ready(function() {
   };
 
   // Create 200 data elements which we can draw to the screen.
-  var nodes = d3.range(10).map(function() {
+  var nodes = d3.range(200).map(function() {
     return {
       radius: 10
     };
@@ -71,23 +71,13 @@ $(document).ready(function() {
           .attr('r', function(d) {
             return d.radius;
           });
+
         return circles;
       }
     };
   });
 
-  var chart = d4.baseChart({
-    config: {
-      axes: {
-        x: {
-          scale: 'linear'
-        },
-        y: {
-          scale: 'linear'
-        }
-      }
-    }
-  })
+  var chart = d4.baseChart({})
     .mixin([{
       'name': 'circles',
       'feature': d4.features.forcedCircle
@@ -100,14 +90,27 @@ $(document).ready(function() {
         circle.force
         .gravity(0.09)
         .charge(function() {
-          return 1 ? 0 : -2000;
+          return 1 ? -6 : -80;
         })
         .nodes(d)
         .size([this.width, this.height])
         .start();
         return d;
-      });
-      circle.afterRender(function(scope, data, selection) {
+      })
+      .on('mouseup', function(d){
+        if(d.selected === true){
+          d.selected = false;
+          d.radius = d.oldRadius;
+          d.fixed = false;
+        } else {
+          d.selected = true;
+          d.oldRadius = d.radius;
+          d.radius = 150;
+          d.fixed = true;
+        }
+        circle.force.resume();
+      }.bind(this))
+      .afterRender(function(scope, data, selection, elements) {
         circle.force.on('tick', function() {
           var q = d3.geom.quadtree(data),
             i = 0,
@@ -117,9 +120,12 @@ $(document).ready(function() {
             q.visit(collide(data[i]));
           }
 
-          selection.selectAll('circle')
+          elements
             .attr('cx', function(d) {
               return d.x;
+            })
+            .attr('r', function(d) {
+              return d.radius;
             })
             .attr('cy', function(d) {
               return d.y;
