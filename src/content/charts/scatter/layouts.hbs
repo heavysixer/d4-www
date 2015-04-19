@@ -8,12 +8,6 @@ charts:
   D3 has a rich collection of <a href="https://github.com/mbostock/d3/wiki/Layouts" target="_blank">layouts</a> which provide a way to organize your data spatially using algorithms.
   This example demonstrates how we can use the force layout with a simple d4 chart. This example is based off Mike Bostock's
   <a href="http://bl.ocks.org/mbostock/3231298" target="_blank">collision detection demo</a>.
-  <dl>
-    <dt>Accessors</dt>
-    <dd><code>circles</code> - series of circles</dd>
-    <dd><code>xAxis</code> - the axis for the <code>x</code> dimension</dd>
-    <dd><code>yAxis</code> - the axis for the <code>y</code> dimension</dd>
-   </dl>
 </p>
 
 <hr/>
@@ -51,7 +45,8 @@ $(document).ready(function() {
   // Create 200 data elements which we can draw to the screen.
   var nodes = d3.range(200).map(function() {
     return {
-      radius: 10
+      radius: 8,
+      oldRadius: 8
     };
   });
 
@@ -63,11 +58,9 @@ $(document).ready(function() {
       render: function(scope, data, selection) {
         var group = d4.appendOnce(selection, 'g.' + name);
         var circles = group.selectAll('circle')
-          .data(data)
+          .data(data);
+        circles
           .enter().append('circle')
-          .attr('data-index', function(d, i) {
-            return i;
-          })
           .attr('r', function(d) {
             return d.radius;
           });
@@ -83,55 +76,63 @@ $(document).ready(function() {
       'feature': d4.features.forcedCircle
     }])
     .using('circles', function(circle) {
-      circle.beforeRender(function(data){
+      circle.beforeRender(function(data) {
         var d = data.map(function(d) {
           return d.values;
         })[0];
         circle.force
-        .gravity(0.09)
-        .charge(function() {
-          return 1 ? -6 : -80;
-        })
-        .nodes(d)
-        .size([this.width, this.height])
-        .start();
+          .nodes(d)
+          .gravity(0.05)
+          .charge(-20)
+          .size([this.width, this.height])
+          .start();
         return d;
       })
-      .on('mouseup', function(d){
-        if(d.selected === true){
-          d.selected = false;
-          d.radius = d.oldRadius;
-          d.fixed = false;
-        } else {
-          d.selected = true;
-          d.oldRadius = d.radius;
-          d.radius = 150;
-          d.fixed = true;
-        }
-        circle.force.resume();
-      }.bind(this))
-      .afterRender(function(scope, data, selection, elements) {
-        circle.force.on('tick', function() {
-          var q = d3.geom.quadtree(data),
-            i = 0,
-            n = data.length;
-
-          while (++i < n) {
-            q.visit(collide(data[i]));
+        .on('mouseup', function(d,i) {
+          if (d.selected === true) {
+            d.selected = false;
+            d.radius = d.oldRadius;
+            d.fixed = false;
+            circle.selectedIndex = undefined;
+          } else {
+            circle.selectedIndex = i;
+            d.selected = true;
+            d.oldRadius = d.radius;
+            d.radius = 150;
+            d.fixed = true;
           }
+          circle.force.resume();
+        }.bind(this))
+        .afterRender(function(scope, data, selection, elements) {
+          circle.force.on('tick', function() {
+            var q = d3.geom.quadtree(data),
+              i = 0,
+              n = data.length;
 
-          elements
-            .attr('cx', function(d) {
-              return d.x;
-            })
-            .attr('r', function(d) {
-              return d.radius;
-            })
-            .attr('cy', function(d) {
-              return d.y;
-            });
+            while (++i < n) {
+              q.visit(collide(data[i]));
+            }
+
+            elements
+            .transition()
+            .duration(100)
+              .attr('cx', function(d) {
+                return d.x;
+              })
+              .attr('cy', function(d) {
+                return d.y;
+              })
+              .attr('class', function(d, i){
+                return (i === circle.selectedIndex) ? 'selected' : '';
+              })
+              .attr('r', function(d,i) {
+                if(i !== circle.selectedIndex && d.oldRadius) {
+                  d.radius = d.oldRadius;
+                }
+                return Math.min(100, d.radius);
+              });
+          });
         });
-      });
     })
     .outerWidth($example.width())
     .outerHeight($example.height());
@@ -140,6 +141,7 @@ $(document).ready(function() {
     .datum(nodes)
     .call(chart);
 });
+
 
 </script>
 <div id="force">

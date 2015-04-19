@@ -414,3 +414,11 @@ svg.d4 {
     width: 960px;
     height:500px;
 }
+#force #example circle {
+    fill: white;
+    stroke: black;
+}
+#force #example .selected {
+    fill: darkred;
+    fill-opacity: 0.6;
+}
